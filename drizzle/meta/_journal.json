@@ -15,6 +15,13 @@
       "when": 1752593030220,
       "tag": "0001_vengeful_scarlet_spider",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1752787162046,
+      "tag": "0002_closed_mephistopheles",
+      "breakpoints": true
     }
   ]
 }

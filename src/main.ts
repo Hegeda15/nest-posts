@@ -11,6 +11,11 @@ async function bootstrap() {
       transform: true, // Automatikusan a DTO osztály példányává alakítja
     }),
   );
+  app.enableCors({
+    origin: 'http://localhost:5173', // Vite/React/Angular origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true, // ha cookie-t vagy token-t küldesz
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
