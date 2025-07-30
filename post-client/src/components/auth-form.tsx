@@ -1,17 +1,28 @@
 import CustomButton from "./custom-button"
 import { useSignUp } from "../logic/useUsers"
+import { signUpSchema } from "../schemas/auth";
 
-function LoginForm() {
+interface FormData {
+    submit: (formdata: FormData) => Promise<void>;
+    get: (key: string) => string | null;
+    isLogin: boolean;
+}
+function AuthForm() {
     const {mutate,isPending} = useSignUp()
     const handleSubmit = async (formdata: any) => {
-        'use server'
         const email = formdata.get('email')
         const name = formdata.get('name')
         const password = formdata.get('password')
 
         const user ={ email, name, password }
 
-        await mutate(user)
+        const res = signUpSchema.safeParse(user)
+        if (!res.success) {
+            console.error("Validation failed", res.error.message);
+            return;
+        }
+        console.log(user);
+        await mutate(user )
     }
     return (
         <div className=" min-w-1/4" >
@@ -25,4 +36,4 @@ function LoginForm() {
     )
 }
 
-export default LoginForm
+export default AuthForm
