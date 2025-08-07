@@ -26,6 +26,8 @@ function PostCard({ postId, title, content, userName, userId }: CardData) {
     /*
         nem mukodik a dislike
         egy többsoros komment
+        ha a like már megvan, akkor a dislike nem eltávolítja a like-ot
+        ha lefrissíted az oldalt, akkor eltűnik a like
     */
     const handleDislike = () => {
         removeLike({
