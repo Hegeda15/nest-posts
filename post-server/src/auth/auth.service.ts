@@ -12,13 +12,20 @@ export class AuthService {
   constructor(
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
   private readonly salt = 10;
 
   async signUp(user: SignUpDto) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const hashPsw = await bcrypt.hash(user.password, this.salt);
+    const existing = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.email, user.email));
 
+    if (existing.length > 0) {
+      throw new ForbiddenException('Email already in use');
+    }
     try {
       const newUser = await db
         .insert(userTable)
@@ -51,21 +58,21 @@ export class AuthService {
       .select()
       .from(userTable)
       .where(eq(userTable.email, user.email));
-  
+
     if (!userQuery) {
       throw new ForbiddenException('nem megfellő email vagy jelszó');
     }
-  
+
     const isValidPsw = await bcrypt.compare(user.password, userQuery.password);
-  
+
     if (!isValidPsw) {
       throw new ForbiddenException('Hibás jelszó!');
     }
-  
+
     return this.createToken(userQuery.id, userQuery.email);
   }
-  
 
+ 
   async createToken(
     id: number,
     email: string,

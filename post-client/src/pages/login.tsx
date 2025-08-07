@@ -1,7 +1,11 @@
+import AuthForm from "../components/auth-form"
 
 function Login() {
   return (
-    <div>Login</div>
+   <div className="flex flex-col items-center justify-center h-screen bg-gray-400">
+        <h1 >Log In</h1>
+        <AuthForm page="login"/>
+    </div>
   )
 }
 

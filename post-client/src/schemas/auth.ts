@@ -1,9 +1,13 @@
 import z from "zod";
 
-export const signUpSchema = z.object({
-    email: z.string().email(" Email is required"),
-    password: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
-    name: z.string().min(2, { message: "name must be at least 2 charaters long" })
-})
-export type SignUpData = z.infer<typeof signUpSchema>;
+export const SignInSchema = z.object({
+  email: z.email({ message: "Érvénytelen email" }),
+  password: z.string().min(6, { message: "A jelszónak legalább 6 karakternek kell lennie" }),
+});
 
+export const SignUpSchema = SignInSchema.extend({
+  name: z.string().min(2, { message: "A név legalább 2 karakter legyen" }),
+});
+
+export type SignInData = z.infer<typeof SignInSchema>;
+export type SignUpData = z.infer<typeof SignUpSchema>;
