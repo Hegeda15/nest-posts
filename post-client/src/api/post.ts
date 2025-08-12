@@ -1,4 +1,5 @@
 import axios from "axios";
+import { get } from "react-hook-form";
 
 export const GetAllPost = async () => {
     try {
@@ -33,6 +34,32 @@ export const LikePost = async ({ postId, userId, reaction }: {
         throw error;
     }
 }
+export const GetLikedPostById = async (id: number) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`http://localhost:3000/likes/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+
+        }
+    }
+    );
+    return response.data;
+};
+
+export const GetOwnPosts = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get("http://localhost:3000/posts/ownpost", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        }
+    });
+    return response.data; {
+    }
+}
 
 export const RemoveLike = async ({
     postId,
@@ -58,3 +85,16 @@ export const RemoveLike = async ({
 
     return response.data;
 };
+
+export const deleteOwnPost = async (postId: number) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.delete(`http://localhost:3000/posts/ownpost/${postId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    });
+
+    return response.data;
+}

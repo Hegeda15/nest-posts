@@ -28,6 +28,23 @@ export class LikesService {
       result: react,
     };
   }
+  async getLikedPost(id: number) {
+    const loked = await db
+      .select({
+        userId: postReactions.userId,
+        postId: postReactions.postId,
+        reactionType: postReactions.reactionType,
+        userName: users.name,
+        content: posts.content,
+        title: posts.title,
+      })
+      .from(postReactions)
+      .innerJoin(posts, eq(postReactions.postId, posts.id))
+      .innerJoin(users, eq(postReactions.userId, users.id))
+      .where(and(eq(users.id, id), eq(postReactions.reactionType, 'like')));
+    console.log(loked);
+    return loked;
+  }
   async getAllLikedPost(id: number) {
     const loked = await db
       .select({

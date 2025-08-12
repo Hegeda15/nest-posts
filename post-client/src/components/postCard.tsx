@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa6";
-import { useLikePost } from "../logic/usePosts";
+import { useLikePost, useRemoveLike } from "../logic/usePosts";
 
 type CardData = {
     postId: number;
@@ -15,7 +15,7 @@ function PostCard({ postId, title, content, userName, userId }: CardData) {
 
     const { mutate: likePost } = useLikePost(() => setLiked(true));
 
-    const { mutate: removeLike } = useLikePost(() => setLiked(false));
+    const { mutate: removeLike } = useRemoveLike(() => setLiked(false));
     const handleLike = () => {
         likePost({
             postId,
@@ -33,7 +33,6 @@ function PostCard({ postId, title, content, userName, userId }: CardData) {
         removeLike({
             postId,
             userId,
-            reaction: "dislike"
         });
     }
 

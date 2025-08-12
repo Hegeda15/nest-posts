@@ -33,6 +33,12 @@ export class LikesController {
       return result;
   }
   @UseGuards(AuthGuard('jwt'))
+  @Get(':id')
+  async getLikedPost(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as any;
+    return await this.likesService.getLikedPost(Number(id));
+  }
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async getAllLiked(@Req() req: Request){
     const user = req.user as any;

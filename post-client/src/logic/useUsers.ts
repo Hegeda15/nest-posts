@@ -3,6 +3,7 @@ import { SignInUser, SignUpUser } from "../api/auth";
 import { useNavigate } from 'react-router-dom';
 import type { SignInData, SignUpData } from "../schemas/auth";
 import { getUserProfile } from "../api/user";
+import { fa } from "zod/v4/locales";
 export const useSignUp = () => {
     const navigate = useNavigate();
 
@@ -50,6 +51,9 @@ export const logOut = () => {
 export const useGetLoggedInUser = () => {
     return useQuery({
         queryKey: ['userProfile'],
-        queryFn: getUserProfile
+        queryFn: getUserProfile,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        enabled: !!localStorage.getItem("token"), 
+        refetchOnWindowFocus: false,
     })
 }
