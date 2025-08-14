@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { deleteOwnPost, GetAllPost, GetLikedPostById, GetOwnPosts, LikePost, RemoveLike } from "../api/post";
+import { deleteOwnPost, editOwnPost, GetAllPost, GetLikedPostById, GetOwnPosts, LikePost, RemoveLike } from "../api/post";
 import { useInvalidateQueries } from "../hooks/queryclient";
+import { useNavigate } from "react-router-dom";
+import { set } from "zod";
 
 type CardData = {
     postId: number;
@@ -73,4 +75,17 @@ export const useDeleteOwnPost = () => {
         },
     
     });
+}
+export const useEditOwnPost = () => {
+    const navigate = useNavigate();
+    const {invalidateQueries} = useInvalidateQueries();
+    return useMutation({
+         mutationFn: async ({ postId, title, content }: { postId: number; title: string; content: string }) => 
+            editOwnPost(postId, { title, content }),
+        onSuccess:()=>{
+            invalidateQueries(['ownPosts']);
+            setTimeout(() =>navigate('/ownposts'), 2000);
+            
+        }
+    })
 }

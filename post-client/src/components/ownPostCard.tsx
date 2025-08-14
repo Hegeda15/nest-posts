@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useDeleteOwnPost } from "../logic/usePosts";
 
 type CardData = {
@@ -24,7 +25,9 @@ function OwnPostCard({ postId, title, content, userName, userId }: CardData) {
                     Delete Post
                 </button>
                 <button className="bg-blue-500 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-600 ml-2">
+                    <Link to={`/editOwnPost/${postId}`} className="text-white">
                     Edit Post
+                    </Link>
                 </button>
             </div>
         </div>

@@ -98,3 +98,14 @@ export const deleteOwnPost = async (postId: number) => {
 
     return response.data;
 }
+export const editOwnPost = async (postId: number, postData: { title: string; content: string }) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.patch(`http://localhost:3000/posts/ownpost/${postId}`, postData, {
+         headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    });
+    return response.data;
+}

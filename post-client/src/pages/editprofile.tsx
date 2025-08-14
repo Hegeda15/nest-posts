@@ -1,8 +1,10 @@
-import React from 'react'
+import PostForm from '../components/post-form'
 
 function EditprofilePage() {
   return (
-    <div>EditprofilePage</div>
+    <div>
+     
+    </div>
   )
 }
 

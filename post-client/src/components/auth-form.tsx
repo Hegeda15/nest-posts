@@ -11,7 +11,7 @@ interface AuthFormProps {
 const AuthForm = ({ page }: AuthFormProps) => {
     const isSignup = page === "signup";
 
-    const { mutate: signUp, isPending: isSignUpPending,error:signUpError,isError:signUpIsError } = useSignUp();
+    const { mutate: signUp, isPending: isSignUpPending, error: signUpError, isError: signUpIsError } = useSignUp();
     const { mutate: signIn, isPending: isSignInPending, error, isError } = useSignIn();
 
     const isPending = isSignup ? isSignUpPending : isSignInPending;
@@ -41,6 +41,7 @@ const AuthForm = ({ page }: AuthFormProps) => {
                 disabled={isPending}
                 placeholder="Email..."
                 className="border-2 border-amber-700 h-12 rounded-lg px-2"
+
             />
             {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
             {isSignup && (
@@ -78,15 +79,15 @@ const AuthForm = ({ page }: AuthFormProps) => {
             >
                 {isPending ? "Küldés..." : "Beküldés"}
             </CustomButton>
-            
+
             {isError && (
                 <span className="text-red-500 text-sm">
-                     Hiba a regisztráció során:  {error?.response?.data?.message ?? "Ismeretlen hiba történt."}
+                    Hiba a regisztráció során:  {error?.response?.data?.message ?? "Ismeretlen hiba történt."}
                 </span>
             )}
-             {signUpIsError && (
+            {signUpIsError && (
                 <span className="text-red-500 text-sm">
-                     Hiba a regisztráció során:  {signUpError?.response?.data?.message ?? "Ismeretlen hiba történt."}
+                    Hiba a regisztráció során:  {signUpError?.response?.data?.message ?? "Ismeretlen hiba történt."}
                 </span>
             )}
         </form>
