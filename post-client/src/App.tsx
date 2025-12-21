@@ -8,6 +8,7 @@ import Navbar from "./components/navbar"
 import EditprofilePage from "./pages/editprofile"
 import OwnpostsPage from "./pages/ownposts"
 import EditOwnPost from "./pages/editOwnPost"
+import CreatePost from "./pages/createPost"
 
 function App() {
   const queryClient = new QueryClient()
@@ -32,6 +33,7 @@ function App() {
                 <Route path="/editprofile" element={<EditprofilePage />} />
                 <Route path="/ownposts" element={<OwnpostsPage />} />
                 <Route path="/editOwnPost/:id" element={<EditOwnPost />} />
+                <Route path="/newpost" element={<CreatePost />} />
               </Route>
             </Route>
           </Routes>

@@ -1,15 +1,17 @@
 import React from 'react'
-import { logOut, useGetLoggedInUser } from '../logic/useUsers';
+import {  useGetLoggedInUser } from '../logic/useUsers';
 import { useNavigate } from 'react-router-dom';
 import LogoutButton from '../components/logutBtn';
 import PostCard from '../components/postCard';
 import { useGetAllPost } from '../logic/usePosts';
+import { useLogout } from "../logic/useUsers";
+
 
 function Home() {
 
   const { data } = useGetLoggedInUser();
   const { data: posts } = useGetAllPost();
-
+const logout = useLogout();
   return (
     <div>
       <h1>Welcome to the Home Page</h1>
@@ -27,6 +29,9 @@ function Home() {
           <PostCard key={post.postId} content={post.content} userName={post.userName} title={post.title} userId={post.userId} postId={post.postId} />
         ))}
       </div>
+        <button onClick={logout}>
+            Kilépés
+        </button>
 
     </div>
   )

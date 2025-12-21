@@ -1,8 +1,11 @@
-import { Outlet, Navigate } from "react-router-dom";
-const ProtectedRoutes = () => {
-    const user = localStorage.getItem('token'); // Assuming user data is stored in localStorage
-    console.log("Token in ProtectedRoutes:", user);
+import { Navigate, Outlet } from "react-router-dom";
 
-    return user ? <Outlet /> : <Navigate to="/login" replace />
+export default function ProtectedRoutes() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />; 
 }
-export default ProtectedRoutes;

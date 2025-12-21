@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { deleteOwnPost, editOwnPost, GetAllPost, GetLikedPostById, GetOwnPosts, LikePost, RemoveLike } from "../api/post";
+import { createPost, deleteOwnPost, editOwnPost, GetAllPost, GetLikedPostById, GetOwnPosts, LikePost, RemoveLike } from "../api/post";
 import { useInvalidateQueries } from "../hooks/queryclient";
 import { useNavigate } from "react-router-dom";
 import { set } from "zod";
@@ -22,14 +22,14 @@ export const useGetLikedPostById = (id: number) => {
     return useQuery({
         queryKey: ['likedPost', id],
         queryFn: () => GetLikedPostById(id),
-        enabled: !!id, 
+        enabled: !!id,
     })
 }
-export const useGetOwnPosts=()=>{
+export const useGetOwnPosts = () => {
     return useQuery<CardData[]>({
         queryKey: ['ownPosts'],
         queryFn: GetOwnPosts,
-        
+
     })
 }
 export const useLikePost = (onLiked?: () => void) => {
@@ -49,7 +49,7 @@ export const useLikePost = (onLiked?: () => void) => {
 
 };
 
-export const useRemoveLike = (onRemoveLike?:()=>void) => {
+export const useRemoveLike = (onRemoveLike?: () => void) => {
     return useMutation({
         mutationFn: RemoveLike,
         onSuccess: (data) => {
@@ -63,29 +63,47 @@ export const useRemoveLike = (onRemoveLike?:()=>void) => {
     })
 }
 export const useDeleteOwnPost = () => {
-     const {invalidateQueries} = useInvalidateQueries();
+    const { invalidateQueries } = useInvalidateQueries();
     return useMutation({
         mutationFn: deleteOwnPost,
         onSuccess: () => {
-             invalidateQueries(['ownPosts']);
+            invalidateQueries(['ownPosts']);
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message ?? error.message;
             console.error("Error deleting post:", message);
         },
-    
+
     });
 }
 export const useEditOwnPost = () => {
-    const navigate = useNavigate();
-    const {invalidateQueries} = useInvalidateQueries();
+    const navigate = useNavigate()
+    const { invalidateQueries } = useInvalidateQueries();
+
     return useMutation({
-         mutationFn: async ({ postId, title, content }: { postId: number; title: string; content: string }) => 
+        mutationFn: async ({ postId, title, content }: { postId: number; title: string; content: string }) =>
             editOwnPost(postId, { title, content }),
-        onSuccess:()=>{
+        onSuccess: () => {
             invalidateQueries(['ownPosts']);
-            setTimeout(() =>navigate('/ownposts'), 2000);
-            
+            setTimeout(() => navigate('/ownposts'), 2000);
+        }
+    })
+}
+
+
+export const useCreatePost = () => {
+    const { invalidateQueries } = useInvalidateQueries();
+    const navigate = useNavigate();
+
+    return useMutation({
+        mutationFn: createPost,
+        onSuccess: () => {
+            invalidateQueries(['ownPosts']);
+            setTimeout(() => navigate('/ownposts'), 2000);
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message ?? error.message;
+            console.error("Error creating post:", message);
         }
     })
 }

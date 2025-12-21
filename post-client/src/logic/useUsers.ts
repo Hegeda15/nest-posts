@@ -41,19 +41,22 @@ export const useSignIn = () => {
         }
     })
 }
-export const logOut = () => {
+export const useLogout = () => {
     const navigate = useNavigate();
 
-    localStorage.removeItem("token");
-    navigate('/login');
-}
+    return () => {
+        localStorage.removeItem("token");
+        navigate('/login');
+    };
+};
+
 
 export const useGetLoggedInUser = () => {
     return useQuery({
         queryKey: ['userProfile'],
         queryFn: getUserProfile,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        enabled: !!localStorage.getItem("token"), 
+        enabled: !!localStorage.getItem("token"),
         refetchOnWindowFocus: false,
     })
 }

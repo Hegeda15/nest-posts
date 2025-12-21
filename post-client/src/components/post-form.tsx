@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEditOwnPost } from "../logic/usePosts";
+import { useCreatePost, useEditOwnPost } from "../logic/usePosts";
 import { EditPostSchema } from "../schemas/postSchema";
 import { useForm } from "react-hook-form";
 import CustomButton from "./custom-button";
@@ -8,7 +8,8 @@ type PostFormProps = {
   postId?: number;
 };
 function PostForm({ page, postId }: PostFormProps) {
-  const { mutate: editOwnPost, isPending,isSuccess:isSuccesEdit } = useEditOwnPost();
+  const { mutate: editOwnPost, isPending, isSuccess: isSuccesEdit } = useEditOwnPost();
+  const { mutate: createPost, isPending: CreateIspending, isSuccess: isSuccessCreate } = useCreatePost();
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(EditPostSchema),
@@ -17,7 +18,7 @@ function PostForm({ page, postId }: PostFormProps) {
     if (page === "edit" && postId) {
       editOwnPost({ postId, ...data });
     } else {
-      null
+      createPost(data);
     }
   };
   return (
@@ -41,9 +42,10 @@ function PostForm({ page, postId }: PostFormProps) {
         variant="secondary"
         className="cursor-pointer"
       >
-        {isPending ? "Küldés..." : "Beküldés"}
+        {isPending || CreateIspending ? "Küldés..." : "Beküldés"}
       </CustomButton>
       {isSuccesEdit && <span className="text-sm p-5 bg-green-300">Sikeres szerkesztés!</span>}
+      {isSuccessCreate && <span className="text-sm p-5 bg-green-300">Sikeres létrehozás!</span>}
     </form>
   )
 }
