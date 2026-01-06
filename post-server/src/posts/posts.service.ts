@@ -1,9 +1,8 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { db } from 'db';
-import { posts, users } from 'drizzle/schema';
 import { PostDto } from './dto';
 import { eq } from 'drizzle-orm';
-import { postReactions, userTable } from 'db/schema';
+import { posts,postReactions, users } from 'db/schema';
 import { error } from 'console';
 
 @Injectable()
@@ -15,12 +14,11 @@ export class PostsService {
         title: posts.title,
         content: posts.content,
         userId: posts.userId,
-        userName: userTable.name, // vagy username, attól függ, hogy hívják nálad
+        userName: users.name, // vagy username, attól függ, hogy hívják nálad
       })
       .from(posts)
-      .leftJoin(userTable, eq(posts.userId, userTable.id))
-      .where(eq(posts.userId, userTable.id));
-
+      .leftJoin(users, eq(posts.userId, users.id))
+      .where(eq(posts.userId, users.id));
     return postsWithUser;
   }
 
@@ -31,10 +29,10 @@ export class PostsService {
         title: posts.title,
         content: posts.content,
         userId: posts.userId,
-        userName: userTable.name, // vagy username, attól függ, hogy hívják nálad
+        userName: users.name, 
       })
       .from(posts)
-      .leftJoin(userTable, eq(posts.userId, userTable.id))
+      .leftJoin(users, eq(posts.userId, users.id))
       .where(eq(posts.userId,id ));
 
     return postsWithUser;
@@ -45,10 +43,13 @@ export class PostsService {
       title: dto.title,
       content: dto.content,
       userId: userId,
+      imageUrl: dto.imageUrl,
     });
-    console.log(post);
+    
     return { message: 'poszt sikeresen létrehozva', post: post };
   }
+
+
   async deletePost(id: number){
     const [post]= await db.delete(posts).where(eq(posts.id,id))
     if (!post.affectedRows) {

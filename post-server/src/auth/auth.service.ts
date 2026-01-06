@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { db } from 'db';
-import { userTable } from 'db/schema';
+import { users } from 'db/schema';
 import { SignInDto, SignUpDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
@@ -20,15 +20,15 @@ export class AuthService {
     const hashPsw = await bcrypt.hash(user.password, this.salt);
     const existing = await db
       .select()
-      .from(userTable)
-      .where(eq(userTable.email, user.email));
+      .from(users)
+      .where(eq(users.email, user.email));
 
     if (existing.length > 0) {
       throw new ForbiddenException('Email already in use');
     }
     try {
       const newUser = await db
-        .insert(userTable)
+        .insert(users)
         .values({
           name: user.name,
           email: user.email,
@@ -56,8 +56,8 @@ export class AuthService {
   async signIn(user: SignInDto) {
     const [userQuery] = await db
       .select()
-      .from(userTable)
-      .where(eq(userTable.email, user.email));
+      .from(users)
+      .where(eq(users.email, user.email));
 
     if (!userQuery) {
       throw new ForbiddenException('nem megfellő email vagy jelszó');

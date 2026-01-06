@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { Url } from 'url';
 
 export class PostDto {
   @IsString()
@@ -9,5 +10,8 @@ export class PostDto {
   @IsString()
   @Expose()
   content: string;
- 
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { db } from 'db';
-import { userTable } from 'db/schema';
+import { users } from 'db/schema';
 import { eq } from 'drizzle-orm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
@@ -21,12 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: { sub: number; email: string }) {
-    const users = await db
+    const allUser = await db
       .select()
-      .from(userTable)
-      .where(eq(userTable.id, payload.sub));
+      .from(users)
+      .where(eq(users.id, payload.sub));
 
-    const user = users[0];
+    const user = allUser[0];
     if (!user) {
       return null;
     }

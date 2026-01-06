@@ -11,16 +11,24 @@ import {
   Patch,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AuthGuard } from '@nestjs/passport';
 import { PostDto } from './dto';
 import { Request } from 'express';
-
+import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
+import CloudinaryStorage from 'multer-storage-cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'stream';
+import { ApiBody } from '@nestjs/swagger';
+import { Inject } from '@nestjs/common'; import { v2 as Cloudinary } from 'cloudinary';
 @Controller('posts')
 export class PostsController {
-  constructor(private postService: PostsService) {}
+  constructor(private postService: PostsService,
+    @Inject('CLOUDINARY') private cloudinary: typeof Cloudinary,) { }
   // @UseGuards(AuthGuard('jwt'))
   @Get()
   getPosts() {
@@ -38,9 +46,33 @@ export class PostsController {
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  createPost(@Body() dto: PostDto, @Req() req: Request) {
+
+  @UseInterceptors(
+    FileInterceptor('image'))
+  async createPost(@Body() dto: PostDto, @UploadedFile() file: Express.Multer.File, @Req() req: Request) {
     const user = req.user as any; // vagy típusosítani, ha van saját interface-ed
     const userId = user.sub; // `sub`, nem `id`, ahogy a JWT payload-ban definiáltad
+    // 🔍 DEBUG – ezt később kiveheted
+    console.log({
+      hasFile: !!file,
+      hasBuffer: !!file?.buffer,
+      bufferSize: file?.buffer?.length,
+      mime: file?.mimetype,
+    });
+    console.log('Injected cloudinary:', this.cloudinary);
+    if (file) {
+      const uploadResult: any = await new Promise((resolve, reject) => {
+        const stream = this.cloudinary.uploader.upload_stream({ folder: 'posts', resource_type: 'image', }, (error, result) => { if (error) return reject(error); resolve(result); },);
+
+        Readable.from(file.buffer)
+          .on('error', reject)
+          .pipe(stream);
+      });
+      console.log('Cloudinary result:', uploadResult);
+
+      dto.imageUrl = uploadResult.secure_url;
+    }
+
     return this.postService.createUserPost(dto, userId);
   }
 
@@ -64,5 +96,5 @@ export class PostsController {
       throw new HttpException('nincs iylen id', HttpStatus.NOT_FOUND);
     }
   }
-  
+
 }

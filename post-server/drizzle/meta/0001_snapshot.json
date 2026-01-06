@@ -1,29 +1,22 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e1fcf2b2-d241-43fe-a79a-0291eeaf1fc0",
-  "prevId": "2630d0db-082e-41b8-863e-8026f2f263f4",
+  "id": "8fa8262b-3c97-4e4c-8dbc-da4f3f3857da",
+  "prevId": "a32b3f3d-32e1-4ba4-b041-7873161730bc",
   "tables": {
     "post_reactions": {
       "name": "post_reactions",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
         "user_id": {
           "name": "user_id",
-          "type": "bigint",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "post_id": {
           "name": "post_id",
-          "type": "bigint",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -46,8 +39,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "post_reactions_user_id_users_id_fk": {
-          "name": "post_reactions_user_id_users_id_fk",
+        "post_reactions_user_id_fkey": {
+          "name": "post_reactions_user_id_fkey",
           "tableFrom": "post_reactions",
           "tableTo": "users",
           "columnsFrom": [
@@ -56,11 +49,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "post_reactions_post_id_posts_id_fk": {
-          "name": "post_reactions_post_id_posts_id_fk",
+        "post_reactions_post_id_fkey": {
+          "name": "post_reactions_post_id_fkey",
           "tableFrom": "post_reactions",
           "tableTo": "posts",
           "columnsFrom": [
@@ -69,19 +62,13 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "post_reactions_id": {
-          "name": "post_reactions_id",
-          "columns": [
-            "id"
-          ]
-        },
-        "post_reactions_user_id_post_id_pk": {
-          "name": "post_reactions_user_id_post_id_pk",
+        "post_reactions_user_id_post_id": {
+          "name": "post_reactions_user_id_post_id",
           "columns": [
             "user_id",
             "post_id"
@@ -96,14 +83,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "bigint",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -129,12 +116,19 @@
           "notNull": false,
           "autoincrement": false,
           "default": "(now())"
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "posts_user_id_users_id_fk": {
-          "name": "posts_user_id_users_id_fk",
+        "posts_user_id_fkey": {
+          "name": "posts_user_id_fkey",
           "tableFrom": "posts",
           "tableTo": "users",
           "columnsFrom": [
@@ -143,7 +137,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -163,7 +157,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": true

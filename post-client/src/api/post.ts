@@ -111,6 +111,7 @@ export const editOwnPost = async (postId: number, postData: { title: string; con
 }
 export const createPost = async (postData: { title: string; content: string }) => {
     const token= localStorage.getItem("token");
+    
     const response = await axios.post("http://localhost:3000/posts", postData, {
         headers:{
             Authorization: `Bearer ${token}`,

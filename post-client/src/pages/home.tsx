@@ -33,6 +33,10 @@ const logout = useLogout();
             Kilépés
         </button>
 
+        <div>
+          <input type="file" />
+        </div>
+
     </div>
   )
 

@@ -1,47 +1,45 @@
-import {
-  mysqlTable,
-  serial,
-  bigint,
-  int,
-  text,
-  varchar,
-  timestamp,
-  mysqlEnum,
-  primaryKey,
-} from 'drizzle-orm/mysql-core';
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, primaryKey, int, mysqlEnum, timestamp, unique, serial, text, varchar } from "drizzle-orm/mysql-core"
+import { sql } from "drizzle-orm"
+import { foreignKey } from "drizzle-orm/mysql-core";
 
-export const userTable = mysqlTable('users', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  email: varchar('email', { length: 250 }).notNull().unique(),
-  password: varchar('password', { length: 250 }).notNull(),
-});
+export const users = mysqlTable("users", {
+	id: int("id").primaryKey().autoincrement().notNull(),
+	name: varchar({ length: 100 }).notNull(),
+	email: varchar({ length: 250 }).notNull(),
+	password: varchar({ length: 250 }).notNull(),
+},
+	(table) => [
+		primaryKey({ columns: [table.id], name: "users_id" }),
+		
+		unique("users_email_unique").on(table.email),
+	]);
 
-export const posts = mysqlTable('posts', {
-  id: serial('id').primaryKey(),
-  userId: bigint('user_id', { mode: 'number' }) // <--- FONTOS
-    .notNull()
-    .references(() => userTable.id, {
-      onDelete: 'cascade',
-    }),
-  title: text('title').notNull(),
-  content: text('content'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+export const posts = mysqlTable("posts", {
+	id: int("id").primaryKey().autoincrement().notNull(),
+	userId: int("user_id").notNull(),
+	title: text().notNull(),
+	content: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).default(sql`(now())`),
+	imageUrl: varchar('image_url', { length: 255 })
+},
+	(table) => [
+		primaryKey({ columns: [table.id], name: "posts_id" }),
+		
 
-export const postReactions = mysqlTable(
-  'post_reactions',
-  {
-    userId: bigint('user_id', { mode: 'number' }) // <--- FONTOS
-      .notNull()
-      .references(() => userTable.id, { onDelete: 'cascade' }),
-    postId: bigint('post_id', { mode: 'number' }) // ha a `posts.id` is serial
-      .notNull()
-      .references(() => posts.id, { onDelete: 'cascade' }),
-    reactionType: mysqlEnum('reaction_type', ['like', 'dislike']).notNull(),
-    reactedAt: timestamp('reacted_at').defaultNow(),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.userId, table.postId] }),
-  }),
-);
+		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "posts_user_id_fkey"})
+	]);
+
+export const postReactions = mysqlTable("post_reactions", {
+	userId: int("user_id").notNull(),
+	postId: int("post_id").notNull(),
+	reactionType: mysqlEnum("reaction_type", ['like', 'dislike']).notNull(),
+	reactedAt: timestamp("reacted_at", { mode: 'string' }).default(sql`(now())`),
+},
+	(table) => [
+		primaryKey({ columns: [table.userId, table.postId], name: "post_reactions_user_id_post_id" }),
+
+		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "post_reactions_user_id_fkey" }),
+		foreignKey({ columns: [table.postId], foreignColumns: [posts.id], name: "post_reactions_post_id_fkey" })
+	]);
+
+

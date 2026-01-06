@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { db } from 'db';
-import { postReactions, posts, userTable } from 'db/schema';
+import { postReactions, posts, users } from 'db/schema';
 import { and, eq } from 'drizzle-orm';
-import { users } from 'drizzle/schema';
 import { existingPost } from 'src/utils';
 @Injectable()
 export class LikesService {
