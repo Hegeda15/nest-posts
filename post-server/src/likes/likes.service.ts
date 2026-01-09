@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { db } from 'db';
 import { postReactions, posts, users } from 'db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
+import e from 'express';
 import { existingPost } from 'src/utils';
 @Injectable()
 export class LikesService {
@@ -84,5 +85,47 @@ export class LikesService {
       result: deleted,
     };
   }
-  
+
+  async likeMethod(userId: number, postId: number) {
+   const exist= await db.select().from(postReactions)
+   .where(and(
+    eq(postReactions.userId,userId),
+    eq( postReactions.postId,postId),
+    
+   )).limit(1);
+
+   if(!exist.length){
+    await db.insert(postReactions).values({
+      userId:userId,
+      postId:postId,
+      reactionType:'like',
+    });
+    return {status:'liked'};
+   }
+   if(exist[0].reactionType==='like'){
+    await db.delete(postReactions).where(and(
+      eq(postReactions.userId,userId),
+      eq( postReactions.postId,postId),
+     ));
+     return {status:'unliked'};
+   }
+    await db.update(postReactions).set({reactionType:'like'}).where(and(
+      eq(postReactions.userId,userId),
+      eq( postReactions.postId,postId),
+     ));
+     return {status:'liked'};
+    
+  }
+
+  async getLikeCount(postId: number) {
+    const res=await db
+    .select({count:sql<number>`count(*)`})
+    .from(postReactions)
+    .where(and(
+      eq(postReactions.postId,postId),
+      eq(postReactions.reactionType,'like')
+    ));
+    return res[0].count;
+  }
+
 }

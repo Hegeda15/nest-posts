@@ -26,7 +26,7 @@ const logout = useLogout();
       <LogoutButton />
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4'>
         {posts?.map((post) => (
-          <PostCard key={post.postId} content={post.content} userName={post.userName} title={post.title} userId={post.userId} postId={post.postId} />
+          <PostCard key={post.id} />
         ))}
       </div>
         <button onClick={logout}>

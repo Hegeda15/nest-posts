@@ -1,19 +1,14 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createPost, deleteOwnPost, editOwnPost, GetAllPost, GetLikedPostById, GetOwnPosts, LikePost, RemoveLike } from "../api/post";
 import { useInvalidateQueries } from "../hooks/queryclient";
 import { useNavigate } from "react-router-dom";
-import { set } from "zod";
+import type { Post } from "../schemas/types/type";
 
-type CardData = {
-    postId: number;
-    title: string;
-    content: string;
-    userId: number;
-    userName: string;
-}
+
+
 
 export const useGetAllPost = () => {
-    return useQuery<CardData[]>({
+    return useQuery<Post[]>({
         queryKey: ['posts'],
         queryFn: GetAllPost,
     });
@@ -26,20 +21,20 @@ export const useGetLikedPostById = (id: number) => {
     })
 }
 export const useGetOwnPosts = () => {
-    return useQuery<CardData[]>({
+    return useQuery<Post[]>({
         queryKey: ['ownPosts'],
         queryFn: GetOwnPosts,
 
     })
 }
-export const useLikePost = (onLiked?: () => void) => {
+export const useLikePost = () => {
+    const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: LikePost,
+       mutationFn: ({ postId }: { postId: number }) => LikePost({ postId }),
 
-        onSuccess: (data) => {
+        onSuccess: () => {
 
-            console.log("Post liked successfully:", data);
-            onLiked?.();
+           queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message ?? error.message;

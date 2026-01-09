@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { SignInData, SignUpData } from "../schemas/auth";
 import { getUserProfile } from "../api/user";
 import { fa } from "zod/v4/locales";
+import type { User } from "../schemas/types/type";
 export const useSignUp = () => {
     const navigate = useNavigate();
 
@@ -52,7 +53,7 @@ export const useLogout = () => {
 
 
 export const useGetLoggedInUser = () => {
-    return useQuery({
+    return useQuery<User>({
         queryKey: ['userProfile'],
         queryFn: getUserProfile,
         staleTime: 1000 * 60 * 5, // 5 minutes

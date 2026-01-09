@@ -1,60 +1,69 @@
 import { useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa6";
-import { useLikePost, useRemoveLike } from "../logic/usePosts";
+import { useGetAllPost, useLikePost, useRemoveLike } from "../logic/usePosts";
+import type { Post } from "../schemas/types/type";
+import { useGetLoggedInUser } from "../logic/useUsers";
+import { FaRegComment } from "react-icons/fa";
+import { TbShare3 } from "react-icons/tb";
+import { FaRegBookmark } from "react-icons/fa";
 
-type CardData = {
-    postId: number;
-    title: string;
-    content: string;
-    userId: number;
-    userName: string;
-}
 
-function PostCard({ postId, title, content, userName, userId }: CardData) {
-    const [liked, setLiked] = useState(false);
+function PostCard() {
+    const { data: posts, isLoading, error } = useGetAllPost();
+    const { data: user } = useGetLoggedInUser();
+    const likeMutation = useLikePost();
 
-    const { mutate: likePost } = useLikePost(() => setLiked(true));
-
-    const { mutate: removeLike } = useRemoveLike(() => setLiked(false));
-    const handleLike = () => {
-        likePost({
-            postId,
-            userId,
-            reaction: "like"
-        });
-    };
-    /*
-        nem mukodik a dislike
-        egy többsoros komment
-        ha a like már megvan, akkor a dislike nem eltávolítja a like-ot
-        ha lefrissíted az oldalt, akkor eltűnik a like
-    */
-    const handleDislike = () => {
-        removeLike({
-            postId,
-            userId,
-        });
-    }
-
+    if (isLoading) return <p>Betöltés...</p>;
+    if (error) return <p>Hiba történt</p>;
 
     return (
-        <div className="flex flex-col justify-center items-center bg-white shadow-md rounded-lg p-6 text-xl">
-            <h2 className="text-xl font-bold mb-2 text-cyan-900">Cim: {title}</h2>
-            <p className="text-gray-700">Tartalom:{content}</p>
-            <p className="text-gray-700">Létrehozó: {userName}</p>
-            <p className="text-gray-500 text-sm">Post ID: {postId}</p>
-            <p className="text-gray-500 text-sm">User ID: {userId}</p>
+        <div className="max-w-screen md:max-w-2xl md:mx-auto space-y-4">
+            {posts?.map((post) => (
+                
+                <div key={post.postId} className="border mt-7  rounded p-4">
+                    <div>
+                        <div className="flex gap-4">
+                            <span>Profilkep</span>
+                            <h1>{user?.name}</h1>
+                        </div>
 
-            <div onClick={liked ? handleDislike : handleLike} className="cursor-pointer">
-                {liked ? (
-                    <FaHeart className="text-red-600 text-3xl" />
-                ) : (
-                    <FaRegHeart className="text-gray-400 text-3xl" />
-                )}
-            </div>
 
+
+                    </div>
+
+
+                    {post.imageUrl && (
+                        <img
+                            src={post.imageUrl}
+                            alt={post.title}
+                            className="mt-3  rounded  md:max-h-[20rem]"
+                        />
+
+                    )}
+                    <div className="flex gap-4 mt-4  cursor-pointer items-center">
+                        <div className="flex items-center gap-1">
+                            <FaRegHeart onClick={() => {
+                                
+                                likeMutation.mutate({ postId: post.postId });
+                            }} className="text-lg"/>
+                                <span  className="text-sm">{post.likesCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <FaRegComment className="text-lg" />
+                            <span className="text-sm">20</span>
+                        </div>
+
+                        <TbShare3 className="text-lg"/>
+                        <FaRegBookmark className="text-lg"/>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                        <p className=" font-medium">{user?.name} : </p>
+                        <span>{post.content}</span>
+                    </div>
+                </div>
+            ))}
         </div>
-    )
+    );
 }
 
 export default PostCard

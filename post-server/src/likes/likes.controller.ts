@@ -8,6 +8,12 @@ export class LikesController {
   constructor(private likesService: LikesService) {}
 
   @UseGuards(AuthGuard('jwt'))
+  @Post(':postId')
+  async likedPost(@Param('postId') postId: string, @Req() req ) {
+    return this.likesService.likeMethod(req.user.sub, Number(postId));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   @Post(':id/react')
   async reactToPost(

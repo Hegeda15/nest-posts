@@ -1,27 +1,24 @@
 import axios from "axios";
 import { get } from "react-hook-form";
+import type { Post } from "../schemas/types/type";
 
 export const GetAllPost = async () => {
     try {
-        const res = await axios.get("http://localhost:3000/posts");
+        const res = await axios.get<Post[]>("http://localhost:3000/posts");
         return res.data;
     } catch (error) {
         console.error("Hiba a lekérés során:", error);
         throw error;
     }
 };
-export const LikePost = async ({ postId, userId, reaction }: {
-    postId: number;
-    userId: number;
-    reaction: "like" | "dislike";
-}) => {
+
+export const LikePost = async ({ postId }: { postId: number }) => {
     const token = localStorage.getItem("token");
 
     try {
-        const res = await axios.post(`http://localhost:3000/likes/${postId}/react`, {
-            userId,
-            reaction,
-        }, {
+        const res = await axios.post(`http://localhost:3000/likes/${postId}`, 
+            {}, 
+            {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
@@ -51,7 +48,7 @@ export const GetLikedPostById = async (id: number) => {
 export const GetOwnPosts = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get("http://localhost:3000/posts/ownpost", {
+    const response = await axios.get<Post[]>("http://localhost:3000/posts/ownpost", {
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

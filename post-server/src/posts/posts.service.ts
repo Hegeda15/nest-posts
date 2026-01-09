@@ -14,7 +14,8 @@ export class PostsService {
         title: posts.title,
         content: posts.content,
         userId: posts.userId,
-        userName: users.name, // vagy username, attól függ, hogy hívják nálad
+        userName: users.name,
+        imageUrl:posts.imageUrl // vagy username, attól függ, hogy hívják nálad
       })
       .from(posts)
       .leftJoin(users, eq(posts.userId, users.id))
