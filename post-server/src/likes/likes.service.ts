@@ -69,7 +69,7 @@ export class LikesService {
         `A megadott poszt (id: ${postId}) nem létezik.`,
       );
     }
-  
+
     const deleted = await db
       .delete(postReactions)
       .where(
@@ -79,7 +79,7 @@ export class LikesService {
           eq(postReactions.reactionType, 'like')
         )
       );
-  
+
     return {
       message: 'Reakció törölve.',
       result: deleted,
@@ -87,45 +87,72 @@ export class LikesService {
   }
 
   async likeMethod(userId: number, postId: number) {
-   const exist= await db.select().from(postReactions)
-   .where(and(
-    eq(postReactions.userId,userId),
-    eq( postReactions.postId,postId),
-    
-   )).limit(1);
+    const exist = await db
+      .select()
+      .from(postReactions)
+      .where(
+        and(
+          eq(postReactions.userId, userId),
+          eq(postReactions.postId, postId)
+        )
+      )
+      .limit(1);
 
-   if(!exist.length){
-    await db.insert(postReactions).values({
-      userId:userId,
-      postId:postId,
-      reactionType:'like',
-    });
-    return {status:'liked'};
-   }
-   if(exist[0].reactionType==='like'){
-    await db.delete(postReactions).where(and(
-      eq(postReactions.userId,userId),
-      eq( postReactions.postId,postId),
-     ));
-     return {status:'unliked'};
-   }
-    await db.update(postReactions).set({reactionType:'like'}).where(and(
-      eq(postReactions.userId,userId),
-      eq( postReactions.postId,postId),
-     ));
-     return {status:'liked'};
-    
+    let status: 'liked' | 'unliked';
+
+    if (!exist.length) {
+      await db.insert(postReactions).values({
+        userId,
+        postId,
+        reactionType: 'like',
+      });
+      status = 'liked';
+    } else if (exist[0].reactionType === 'like') {
+      await db.delete(postReactions).where(
+        and(
+          eq(postReactions.userId, userId),
+          eq(postReactions.postId, postId)
+        )
+      );
+      status = 'unliked';
+    } else {
+      await db
+        .update(postReactions)
+        .set({ reactionType: 'like' })
+        .where(
+          and(
+            eq(postReactions.userId, userId),
+            eq(postReactions.postId, postId)
+          )
+        );
+      status = 'liked';
+    }
+
+    // itt lekérjük a friss like countot
+    const likesCount = await this.getLikeCount(postId);
+
+    return {
+      status,
+      likesCount,          // friss like szám
+      userReaction: status === 'liked' ? 'like' : null, // frontendre
+    };
   }
 
+  // getLikeCount maradhat így
   async getLikeCount(postId: number) {
-    const res=await db
-    .select({count:sql<number>`count(*)`})
-    .from(postReactions)
-    .where(and(
-      eq(postReactions.postId,postId),
-      eq(postReactions.reactionType,'like')
-    ));
+    const res = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(postReactions)
+      .where(
+        and(
+          eq(postReactions.postId, postId),
+          eq(postReactions.reactionType, 'like')
+        )
+      );
     return res[0].count;
   }
 
+ 
 }
+
+

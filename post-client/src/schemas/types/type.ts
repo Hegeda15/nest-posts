@@ -5,6 +5,7 @@ export interface Post {
   imageUrl?: string;
   createdAt: string;
   likesCount: number;
+  userReaction?: 'like' | null;
 }
 
 export type User={

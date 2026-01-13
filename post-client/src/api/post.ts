@@ -3,9 +3,10 @@ import { get } from "react-hook-form";
 import type { Post } from "../schemas/types/type";
 
 export const GetAllPost = async () => {
+    const token = localStorage.getItem("token");
     try {
-        const res = await axios.get<Post[]>("http://localhost:3000/posts");
-        return res.data;
+       const res = await axios.get<Post[]>("http://localhost:3000/posts", { headers: { Authorization: `Bearer ${token}` } }); 
+       return res.data;
     } catch (error) {
         console.error("Hiba a lekérés során:", error);
         throw error;

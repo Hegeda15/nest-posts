@@ -1,13 +1,13 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { db } from 'db';
 import { PostDto } from './dto';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { posts,postReactions, users } from 'db/schema';
 import { error } from 'console';
 
 @Injectable()
 export class PostsService {
-  async getPosts() {
+  async getPosts(userId: number) {
     const postsWithUser = await db
       .select({
         postId: posts.id,
@@ -15,7 +15,17 @@ export class PostsService {
         content: posts.content,
         userId: posts.userId,
         userName: users.name,
-        imageUrl:posts.imageUrl // vagy username, attól függ, hogy hívják nálad
+        imageUrl:posts.imageUrl,
+        likesCount: sql<number>`( SELECT count(*) 
+        FROM ${postReactions} pr 
+        WHERE pr.post_id = ${posts.id}
+        AND pr.reaction_type = 'like' )`,
+
+        userReaction: sql<string | null>`( SELECT pr.reaction_type 
+        FROM ${postReactions} pr 
+        WHERE pr.post_id = ${posts.id} 
+        AND pr.user_id = ${userId} 
+        LIMIT 1 )`,
       })
       .from(posts)
       .leftJoin(users, eq(posts.userId, users.id))

@@ -29,19 +29,59 @@ export const useGetOwnPosts = () => {
 }
 export const useLikePost = () => {
     const queryClient = useQueryClient();
+
     return useMutation({
-       mutationFn: ({ postId }: { postId: number }) => LikePost({ postId }),
+        mutationFn: ({ postId }: { postId: number }) => LikePost({ postId }),
 
-        onSuccess: () => {
+        // Optimista update: azonnal változik a UI
+        onMutate: async ({ postId }) => {
+            await queryClient.cancelQueries({ queryKey: ["posts"] });
 
-           queryClient.invalidateQueries({ queryKey: ["posts"] });
+            const previousPosts = queryClient.getQueryData<Post[]>(["posts"]);
+
+            queryClient.setQueryData<Post[]>(["posts"], (old = []) =>
+                old.map(p =>
+                    p.postId === postId
+                        ? {
+                            ...p,
+                            likesCount: p.likesCount
+                                ? p.userReaction === "like"
+                                    ? p.likesCount - 1
+                                    : p.likesCount + 1
+                                : 1,
+                            userReaction: p.userReaction === "like" ? null : "like",
+                        }
+                        : p
+                )
+            );
+
+            return { previousPosts };
         },
-        onError: (error: any) => {
+
+        // On success: frissítjük a cache-t a backendből visszakapott értékekkel
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData<Post[]>(["posts"], old =>
+                old?.map(p =>
+                    p.postId === variables.postId
+                        ? {
+                            ...p,
+                            likesCount: data.likesCount ?? p.likesCount,
+                            userReaction: data.userReaction,
+                        }
+                        : p
+                )
+            );
+        },
+
+        onError: (error: any, variables, context) => {
+            // rollback ha kell
+            if (context?.previousPosts) {
+                queryClient.setQueryData(["posts"], context.previousPosts);
+            }
             const message = error?.response?.data?.message ?? error.message;
             console.error("Error liking post:", message);
-        }
+        },
     });
-
 };
 
 export const useRemoveLike = (onRemoveLike?: () => void) => {

@@ -12,6 +12,7 @@ function PostCard() {
     const { data: posts, isLoading, error } = useGetAllPost();
     const { data: user } = useGetLoggedInUser();
     const likeMutation = useLikePost();
+    const [isLiked, setIsLiked] = useState<boolean>(false);
 
     if (isLoading) return <p>Betöltés...</p>;
     if (error) return <p>Hiba történt</p>;
@@ -42,14 +43,15 @@ function PostCard() {
                     )}
                     <div className="flex gap-4 mt-4  cursor-pointer items-center">
                         <div className="flex items-center gap-1">
-                            <FaRegHeart onClick={() => {
+                            <FaHeart onClick={() => {
                                 
                                 likeMutation.mutate({ postId: post.postId });
-                            }} className="text-lg"/>
+                            }} className={post.userReaction=="like"?"text-red-600 text-lg":"text-lg "}/>
                                 <span  className="text-sm">{post.likesCount}</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <FaRegComment className="text-lg" />
+                          
                             <span className="text-sm">20</span>
                         </div>
 

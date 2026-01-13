@@ -25,14 +25,20 @@ import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream';
 import { ApiBody } from '@nestjs/swagger';
 import { Inject } from '@nestjs/common'; import { v2 as Cloudinary } from 'cloudinary';
+import { LikesService } from 'src/likes/likes.service';
+import { OptionalJwtGuard } from 'src/auth/guards/optional-jwt.guard';
 @Controller('posts')
 export class PostsController {
   constructor(private postService: PostsService,
     @Inject('CLOUDINARY') private cloudinary: typeof Cloudinary,) { }
-  // @UseGuards(AuthGuard('jwt'))
+
+
+ @UseGuards(OptionalJwtGuard)
   @Get()
-  getPosts() {
-    return this.postService.getPosts();
+  getPosts(@Req() req: Request) {
+    const userId = req.user ? (req.user as any).sub : null;
+    return this.postService.getPosts(userId);
+
   }
   @UseGuards(AuthGuard('jwt'))
   @Get('ownpost')
