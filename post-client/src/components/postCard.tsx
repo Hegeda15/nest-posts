@@ -6,14 +6,14 @@ import { useGetLoggedInUser } from "../logic/useUsers";
 import { FaRegComment } from "react-icons/fa";
 import { TbShare3 } from "react-icons/tb";
 import { FaRegBookmark } from "react-icons/fa";
+import { useGetComments } from "../logic/useComments";
 
 
 function PostCard() {
     const { data: posts, isLoading, error } = useGetAllPost();
     const { data: user } = useGetLoggedInUser();
     const likeMutation = useLikePost();
-    const [isLiked, setIsLiked] = useState<boolean>(false);
-
+const { data: comments } = useGetComments(posts ? posts[0].postId : 0);
     if (isLoading) return <p>Betöltés...</p>;
     if (error) return <p>Hiba történt</p>;
 
@@ -52,7 +52,7 @@ function PostCard() {
                         <div className="flex items-center gap-1">
                             <FaRegComment className="text-lg" />
                           
-                            <span className="text-sm">20</span>
+                            <span className="text-sm">{comments?.commentCount}</span>
                         </div>
 
                         <TbShare3 className="text-lg"/>

@@ -7,7 +7,19 @@ export interface Post {
   likesCount: number;
   userReaction?: 'like' | null;
 }
+export type CommentsType={
+  id: number;
+  content: string;
+  postId: number;
+  userId: number;
+  createdAt: string; 
+ 
+}
 
+export type CommentsResponse = {
+  comments: CommentsType[];
+  commentCount: number;
+};
 export type User={
   id: number;
   name: string;

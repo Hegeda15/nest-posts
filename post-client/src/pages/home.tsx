@@ -1,17 +1,21 @@
 import React from 'react'
-import {  useGetLoggedInUser } from '../logic/useUsers';
+import { useGetLoggedInUser } from '../logic/useUsers';
 import { useNavigate } from 'react-router-dom';
 import LogoutButton from '../components/logutBtn';
 import PostCard from '../components/postCard';
 import { useGetAllPost } from '../logic/usePosts';
 import { useLogout } from "../logic/useUsers";
+import { useGetComments } from '../logic/useComments';
 
 
 function Home() {
 
   const { data } = useGetLoggedInUser();
   const { data: posts } = useGetAllPost();
-const logout = useLogout();
+ 
+
+ 
+  const logout = useLogout();
   return (
     <div>
       <h1>Welcome to the Home Page</h1>
@@ -26,16 +30,19 @@ const logout = useLogout();
       <LogoutButton />
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4'>
         {posts?.map((post) => (
-          <PostCard key={post.id} />
+          <PostCard key={post.postId} />
         ))}
       </div>
-        <button onClick={logout}>
-            Kilépés
-        </button>
+     
 
-        <div>
-          <input type="file" />
-        </div>
+     
+      <button onClick={logout}>
+        Kilépés
+      </button>
+
+      <div>
+        <input type="file" />
+      </div>
 
     </div>
   )

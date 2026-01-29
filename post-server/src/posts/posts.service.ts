@@ -2,35 +2,17 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { db } from 'db';
 import { PostDto } from './dto';
 import { eq, sql } from 'drizzle-orm';
-import { posts,postReactions, users } from 'db/schema';
+import { posts,postReactions, users, commentsTable } from 'db/schema';
 import { error } from 'console';
+import { basePostQuery } from 'src/utils';
 
 @Injectable()
 export class PostsService {
   async getPosts(userId: number) {
-    const postsWithUser = await db
-      .select({
-        postId: posts.id,
-        title: posts.title,
-        content: posts.content,
-        userId: posts.userId,
-        userName: users.name,
-        imageUrl:posts.imageUrl,
-        likesCount: sql<number>`( SELECT count(*) 
-        FROM ${postReactions} pr 
-        WHERE pr.post_id = ${posts.id}
-        AND pr.reaction_type = 'like' )`,
-
-        userReaction: sql<string | null>`( SELECT pr.reaction_type 
-        FROM ${postReactions} pr 
-        WHERE pr.post_id = ${posts.id} 
-        AND pr.user_id = ${userId} 
-        LIMIT 1 )`,
-      })
-      .from(posts)
-      .leftJoin(users, eq(posts.userId, users.id))
-      .where(eq(posts.userId, users.id));
-    return postsWithUser;
+    const allPost= basePostQuery(userId);
+    
+    
+    return allPost;
   }
 
   async getOwnPost(id:number){

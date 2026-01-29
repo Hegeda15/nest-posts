@@ -7,6 +7,11 @@ import { PostsModule } from './posts/posts.module';
 import { LikesController } from './likes/likes.controller';
 import { LikesModule } from './likes/likes.module';
 import { CommentsModule } from './comments/comments.module';
+import { SavedPostsModule } from './saved-posts/saved-posts.module';
+import { FriendsModule } from './friends/friends.module';
+import { MessagesModule } from './messages/messages.module';
+import { FriendsModule } from './friends/friends.module';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -19,6 +24,9 @@ import { CommentsModule } from './comments/comments.module';
     PostsModule,
     LikesModule,
     CommentsModule,
+    SavedPostsModule,
+    FriendsModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}

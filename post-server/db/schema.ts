@@ -1,6 +1,8 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, primaryKey, int, mysqlEnum, timestamp, unique, serial, text, varchar } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, primaryKey, int, mysqlEnum, timestamp, unique, serial, text, varchar, uniqueIndex } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 import { foreignKey } from "drizzle-orm/mysql-core";
+import { boolean } from "drizzle-orm/gel-core";
+import { tinyint } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
 	id: int("id").primaryKey().autoincrement().notNull(),
@@ -10,7 +12,7 @@ export const users = mysqlTable("users", {
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "users_id" }),
-		
+
 		unique("users_email_unique").on(table.email),
 	]);
 
@@ -24,9 +26,9 @@ export const posts = mysqlTable("posts", {
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "posts_id" }),
-		
 
-		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "posts_user_id_fkey"})
+
+		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "posts_user_id_fkey" })
 	]);
 
 export const postReactions = mysqlTable("post_reactions", {
@@ -53,4 +55,38 @@ export const commentsTable = mysqlTable("comments", {
 		primaryKey({ columns: [table.id], name: "comments_id" }),
 		foreignKey({ columns: [table.postId], foreignColumns: [posts.id], name: "comments_post_id_fkey" }),
 		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "comments_user_id_fkey" })
+	]);
+
+export const savedPostsTable = mysqlTable("saved_posts", {
+	id: int("id").autoincrement().notNull().primaryKey(),
+	userId: int("user_id").notNull(),
+	postId: int("post_id").notNull(),
+	isSaved: tinyint("is_saved")
+		.notNull()
+		.default(1),
+	savedAt: timestamp("saved_at", { mode: "string" }).default(sql`now()`),
+}, (table) => ({
+	userFk: foreignKey({
+		columns: [table.userId],
+		foreignColumns: [users.id],
+		name: "saved_posts_user_id_fkey",
+	}),
+	postFk: foreignKey({
+		columns: [table.postId],
+		foreignColumns: [posts.id],
+		name: "saved_posts_post_id_fkey",
+	}),
+	userPostUnique: uniqueIndex("saved_posts_user_post_unique")
+		.on(table.userId, table.postId),
+
+}));
+export const friendsTable = mysqlTable("friends", {
+	id: int("id").primaryKey().autoincrement().notNull(),
+	userId: int("user_id").notNull(),
+	
+	
+},	(table) => [
+		primaryKey({ columns: [table.id], name: "friends_id" }),
+		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "friends_user_id_fkey" }),
+		
 	]);
