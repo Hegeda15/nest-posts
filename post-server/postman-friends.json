@@ -1,0 +1,319 @@
+{
+  "info": {
+    "_postman_id": "friends-api-collection",
+    "name": "Friends API",
+    "description": "NestJS Friends/Follow API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Follow User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/friends/:id/follow",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            ":id",
+            "follow"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "2",
+              "description": "Target user ID"
+            }
+          ]
+        },
+        "description": "Follow a user (sends follow request if private, direct follow if public)"
+      },
+      "response": []
+    },
+    {
+      "name": "Unfollow User",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/friends/:id/unfollow",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            ":id",
+            "unfollow"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "2",
+              "description": "Target user ID"
+            }
+          ]
+        },
+        "description": "Unfollow a user"
+      },
+      "response": []
+    },
+    {
+      "name": "Accept Follow Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/friends/requests/:id/accept",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            "requests",
+            ":id",
+            "accept"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "Follow request ID"
+            }
+          ]
+        },
+        "description": "Accept a follow request"
+      },
+      "response": []
+    },
+    {
+      "name": "Reject Follow Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/friends/requests/:id/reject",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            "requests",
+            ":id",
+            "reject"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "Follow request ID"
+            }
+          ]
+        },
+        "description": "Reject a follow request"
+      },
+      "response": []
+    },
+    {
+      "name": "Respond to Follow Request",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"accepted\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/friends/requests/:id/respond",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            "requests",
+            ":id",
+            "respond"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "Follow request ID"
+            }
+          ]
+        },
+        "description": "Respond to a follow request with 'accepted' or 'rejected' status"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Follower Count",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/friends/:id/followers/count",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            ":id",
+            "followers",
+            "count"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "User ID"
+            }
+          ]
+        },
+        "description": "Get the number of followers for a user"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Following Count",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/friends/:id/following/count",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            ":id",
+            "following",
+            "count"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "User ID"
+            }
+          ]
+        },
+        "description": "Get the number of users followed by a user"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Followers List",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/friends/:id/followers",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            ":id",
+            "followers"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "User ID"
+            }
+          ]
+        },
+        "description": "Get list of followers for a user"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Following List",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/friends/:id/following",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "friends",
+            ":id",
+            "following"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1",
+              "description": "User ID"
+            }
+          ]
+        },
+        "description": "Get list of users followed by a user"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    }
+  ]
+}

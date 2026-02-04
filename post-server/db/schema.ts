@@ -9,7 +9,7 @@ export const users = mysqlTable("users", {
 	name: varchar({ length: 100 }).notNull(),
 	email: varchar({ length: 250 }).notNull(),
 	password: varchar({ length: 250 }).notNull(),
-	//isPrivate: boolean("is_private").notNull().default(false),
+	isPrivate: boolean("is_private").notNull().default(false),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "users_id" }),
@@ -106,6 +106,26 @@ export const friendsTable = mysqlTable(
     }),
 	 uniqueReq: uniqueIndex("follow_req_unique")
       .on(table.senderId, table.receiverId),
+  })
+);
+
+export const followsTable = mysqlTable(
+  "follows",
+  {
+    followerId: int("follower_id").notNull(),
+    followingId: int("following_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.followerId, table.followingId] }),
+    followerFk: foreignKey({
+      columns: [table.followerId],
+      foreignColumns: [users.id],
+    }),
+    followingFk: foreignKey({
+      columns: [table.followingId],
+      foreignColumns: [users.id],
+    }),
   })
 );
 

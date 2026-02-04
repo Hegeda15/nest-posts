@@ -1,44 +1,81 @@
-import { Controller, Get, Post, Body, Patch, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, BadRequestException, Req, Delete, UseGuards } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { SendFriendRequestDto, RespondFriendRequestDto } from './dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @Controller('friends')
 export class FriendsController {
-  constructor(private readonly friendsService: FriendsService) {}
+  constructor(private readonly friendsService: FriendsService) { }
 
-  @Post('send')
-  async sendRequest(@Body() body: SendFriendRequestDto & { senderId?: number }) {
-    const senderId = body['senderId'];
-    if (!senderId) throw new BadRequestException('senderId is required in body');
-    return this.friendsService.sendRequestService(senderId, body.receiverId);
-  }
-
-  @Patch(':id/respond')
-  async respond(
-    @Param('id') id: string,
-    @Body() body: RespondFriendRequestDto & { userId?: number },
+  @UseGuards(AuthGuard('jwt'))
+  @Post(":id/follow")
+  follow(
+    @Param("id") targetId: number,
+    @Req() req: Request
   ) {
-    const userId = body['userId'];
-    if (!userId) throw new BadRequestException('userId is required in body');
-    return this.friendsService.respondService(+id, userId, body.status);
+    const user = req.user as any;
+    return this.friendsService.followUser(user.sub, +targetId);
   }
 
-  @Get('pending/:userId')
-  async getPending(@Param('userId') userId: string) {
-    return this.friendsService.getPendingRequests(+userId);
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(":id/unfollow")
+  unfollow(
+    @Param("id") targetId: number,
+    @Req() req: Request
+  ) {
+    const user = req.user as any;
+    return this.friendsService.unfollowUser(user.sub, +targetId);
   }
 
-  @Get('sent/:userId')
-  async getSent(@Param('userId') userId: string) {
-    return this.friendsService.getSentRequests(+userId);
+  @UseGuards(AuthGuard('jwt'))
+  @Post("requests/:id/accept")
+  acceptFollowRequest(
+    @Param("id") requestId: number,
+    @Req() req: Request
+  ) {
+    const user = req.user as any;
+    return this.friendsService.acceptFollowRequest(+requestId, user.sub);
   }
 
-  @Get('list/:userId')
-  async getFriends(@Param('userId') userId: string) {
-    return this.friendsService.getFriendsList(+userId);
+  @UseGuards(AuthGuard('jwt'))
+  @Post("requests/:id/reject")
+  rejectFollowRequest(
+    @Param("id") requestId: number,
+    @Req() req: Request
+  ) {
+    const user = req.user as any;
+    return this.friendsService.rejectFollowRequest(+requestId, user.sub);
   }
-  @Get('count/:userId')
-  async getFollowerCount(@Param('userId') userId: string) {
-    return this.friendsService.FollowerCount(+userId);
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch("requests/:id/respond")
+  respondFollowRequest(
+    @Param("id") requestId: number,
+    @Body() dto: RespondFriendRequestDto,
+    @Req() req: Request
+  ) {
+    const user = req.user as any;
+    return this.friendsService.respondFollowrequest(+requestId, user.sub, dto.status);
+  }
+
+  @Get(":id/followers/count")
+  getFollowerCount(@Param("id") userId: number) {
+    return this.friendsService.getFollowerCount(+userId);
+  }
+
+  @Get(":id/following/count")
+  getFollowingCount(@Param("id") userId: number) {
+    return this.friendsService.getFollowingCount(+userId);
+  }
+
+  @Get(":id/followers")
+  getFollowers(@Param("id") userId: number) {
+    return this.friendsService.getFollowers(+userId);
+  }
+
+  @Get(":id/following")
+  getFollowing(@Param("id") userId: number) {
+    return this.friendsService.getFollowing(+userId);
   }
 }

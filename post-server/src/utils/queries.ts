@@ -73,3 +73,12 @@ export function baseFriendsQueryGet(userId: number) {
 }
 
 //GetIsprivet function for user
+export const getIsPrivate = async (userId: number) => {
+  const res = await db
+    .select({
+      isPrivate: users.isPrivate,
+    })
+    .from(users)
+    .where(eq(users.id, userId));
+  return res.length > 0 ? res[0].isPrivate : null;
+};

@@ -1,104 +1,171 @@
 import { Injectable } from '@nestjs/common';
 import { db } from 'db';
 import { and, eq, or, sql } from 'drizzle-orm';
-import { friendsTable, users } from 'db/schema';
+import { friendsTable as followRequestsTable, followsTable, users } from 'db/schema';
 import { baseFriendsQueryGet, countquery } from 'src/utils';
 import { use } from 'passport';
 
 @Injectable()
 export class FriendsService {
 
-  async sendRequestService(senderId: number, receiverId: number) {
-    if (senderId === receiverId) {
-      throw new Error("Nem küldhetsz magadnak barátkérést");
+
+  async followUser(followerId: number, targetId: number) {
+    if (followerId === targetId) {
+      throw new Error("Nem követheted magad");
     }
-    const existing = await db.select().from(friendsTable).where(
+    const existing = await db.select().from(followsTable).where(
       and(
-        eq(friendsTable.senderId, senderId),
-        eq(friendsTable.receiverId, receiverId),
-        eq(friendsTable.status, "pending")
+        eq(followsTable.followerId, followerId),
+        eq(followsTable.followingId, targetId)
       ));
     if (existing.length > 0) {
-      throw new Error("Már létezik egy függőben lévő barátkérés ehhez a felhasználóhoz");
+      throw new Error("Már követed ezt a felhasználót");
+    }
+    const [target] = await db.select({ isPrivate: users.isPrivate })
+      .from(users)
+      .where(eq(users.id, targetId));
+
+    if (!target) {
+      throw new Error("Nincs ilyen felhasználó");
     }
 
-    await db.insert(friendsTable).values({
-      senderId: senderId,
-      receiverId: receiverId,
-    });
-    return { message: "Barátkérés sikeresen elküldve" };
-  };
 
-  async respondService(requestId: number, userId: number, status: "accepted" | "rejected") {
-    const rows = await db.select().from(friendsTable).where(
+    //Ha public azonnali követés
+    if (!target.isPrivate) {
+      await db.insert(followsTable).values({
+        followerId,
+        followingId: targetId,
+      });
+      return { message: "Sikeresen követted a felhasználót" };
+    }
+    //ha private akkor follow requestet küldünk
+    const existingReq = await db.select()
+      .from(followRequestsTable)
+      .where(and(
+        eq(followRequestsTable.senderId, followerId),
+        eq(followRequestsTable.receiverId, targetId)
+      ));
+    if (existingReq.length > 0) {
+      throw new Error("Már létezik egy függőben lévő követési kérelem ehhez a felhasználóhoz");
+    }
+
+    await db.insert(followRequestsTable).values({
+      senderId: followerId,
+      receiverId: targetId,
+    });
+    return { message: "Követési kérelem sikeresen elküldve" };
+
+  }
+
+  async unfollowUser(followerId: number, targetId: number) {
+    await db
+    .delete(followsTable)
+    .where(
       and(
-        eq(friendsTable.id, requestId),
-        eq(friendsTable.receiverId, userId)
+        eq(followsTable.followerId, followerId),
+        eq(followsTable.followingId, targetId)
       )
     );
+    return { message: "Sikeresen leállítottad a követést" };
+  }
+
+  async acceptFollowRequest(requestId: number, userId: number) {
+    const rows = await db.select()
+      .from(followRequestsTable)
+      .where(and(
+        eq(followRequestsTable.id, requestId),
+        eq(followRequestsTable.receiverId, userId)
+      ));
+    if (rows.length === 0) {
+      throw new Error('Nincs ilyen követési kérelem vagy nincs jogosultságod elfogadni');
+    }
+    const req = rows[0];
+    await db.insert(followsTable).values({
+      followerId: req.senderId,
+      followingId: req.receiverId,
+    });
+
+    await db.delete(followRequestsTable)
+      .where(eq(followRequestsTable.id, requestId));
+
+    return { message: "Kérelem elfogadva" };
+  }
+
+  async rejectFollowRequest(requestId: number, userId: number) {
+    await db.delete(followRequestsTable)
+      .where(and(
+        eq(followRequestsTable.id, requestId),
+        eq(followRequestsTable.receiverId, userId)
+      ));
+      return { message: "Kérelem elutasítva" };
+  }
+
+  async respondFollowrequest(
+    requestId: number,
+    userId: number,
+    status: "accepted" | "rejected"
+  ) {
+    const rows = await db.select()
+      .from(followRequestsTable)
+      .where(and(
+        eq(followRequestsTable.id, requestId),
+        eq(followRequestsTable.receiverId, userId)
+      ))
     if (rows.length === 0) {
       throw new Error('Nincs ilyen barátkérés vagy nincs jogosultságod válaszolni');
     }
     const req = rows[0];
-    if (req.status !== 'pending') {
-      throw new Error('A barátkérés már válaszolt');
+    if (status === 'accepted') {
+      await db.insert(followsTable).values({
+        followerId: req.senderId,
+        followingId: req.receiverId,
+      })
     }
 
-    await db.update(friendsTable).set({ status }).where(eq(friendsTable.id, requestId));
+    await db.delete(followRequestsTable)
+      .where(eq(followRequestsTable.id, requestId));
+
     return { message: `Kérelem ${status}-ként feldolgozva` };
   }
 
-  async getPendingRequests(userId: number) {
-    const rows = await db.select().from(friendsTable).where(
-      and(eq(friendsTable.receiverId, userId), eq(friendsTable.status, 'pending'))
-    );
-    return rows;
-  }
-
-  async getSentRequests(userId: number) {
-    const rows = await db.select().from(friendsTable).where(
-      and(eq(friendsTable.senderId, userId), eq(friendsTable.status, 'pending'))
-    );
-    return rows;
-  }
-
-  async getFriendsList(userId: number) {
-    const friends = await baseFriendsQueryGet(userId);
-
-    const friendsList = await db.select({
-      id: users.id,
-      name: users.name,
-      //profilePicture: users.profilePicture,
-    }).from(users).where(
-      or(
-        ...friends.map(friend => eq(users.id, friend.friendId))
-      )
-    );
-
-    return friendsList;
-  }
-
-  async FollowerCount(userId: number) {
-    const res = await db
-      .select({
-        count: sql<number>`COUNT(*)`
-      })
-      .from(friendsTable)
-      .where(
-        and(
-          eq(friendsTable.status, "accepted"),
-          or(
-            eq(friendsTable.senderId, userId),
-            eq(friendsTable.receiverId, userId)
-          )
-        )
-      );
-
+  //hányan követője van egy usernek
+  async getFollowerCount(userId: number) {
+    const res = await db.select({
+      count: sql<number>`COUNT(*)`
+    })
+      .from(followsTable)
+      .where(eq(followsTable.followingId, userId));
     return res[0]?.count ?? 0;
   }
 
-
-
-
+  // hány embert követ egy user
+  async getFollowingCount(userId: number) {
+    const res = await db.select({
+      count: sql<number>`COUNT(*)`
+    })
+      .from(followsTable)
+      .where(eq(followsTable.followerId, userId));
+    return res[0]?.count ?? 0;
+  }
+  //kik követik egy usert
+  async getFollowers(userId: number) {
+    return db.select({
+      id: users.id,
+      name: users.name,
+    })
+      .from(followsTable)
+      .innerJoin(users, eq(followsTable.followerId, users.id))
+      .where(eq(followsTable.followingId, userId));
+  }
+  //kit követ egy user
+  async getFollowing(userId: number) {
+    return db.select({
+      id: users.id,
+      name: users.name,
+    })
+      .from(followsTable)
+      .innerJoin(users, eq(followsTable.followingId, users.id))
+      .where(eq(followsTable.followerId, userId));
+  }
 
 }
