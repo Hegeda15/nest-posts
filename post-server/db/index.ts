@@ -9,4 +9,8 @@ const pool = createPool({
   uri: process.env.DATABASE_URL,
 });
 
-export const db = drizzle(pool);
+export const db = drizzle(pool
+  
+  
+
+);

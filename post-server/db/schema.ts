@@ -1,7 +1,7 @@
 import { mysqlTable, mysqlSchema, AnyMySqlColumn, primaryKey, int, mysqlEnum, timestamp, unique, serial, text, varchar, uniqueIndex } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 import { foreignKey } from "drizzle-orm/mysql-core";
-import { boolean } from "drizzle-orm/gel-core";
+import { boolean } from "drizzle-orm/mysql-core";
 import { tinyint } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
@@ -9,6 +9,7 @@ export const users = mysqlTable("users", {
 	name: varchar({ length: 100 }).notNull(),
 	email: varchar({ length: 250 }).notNull(),
 	password: varchar({ length: 250 }).notNull(),
+	//isPrivate: boolean("is_private").notNull().default(false),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "users_id" }),
@@ -80,13 +81,31 @@ export const savedPostsTable = mysqlTable("saved_posts", {
 		.on(table.userId, table.postId),
 
 }));
-export const friendsTable = mysqlTable("friends", {
-	id: int("id").primaryKey().autoincrement().notNull(),
-	userId: int("user_id").notNull(),
-	
-	
-},	(table) => [
-		primaryKey({ columns: [table.id], name: "friends_id" }),
-		foreignKey({ columns: [table.userId], foreignColumns: [users.id], name: "friends_user_id_fkey" }),
-		
-	]);
+export const friendsTable = mysqlTable(
+  "friend_requests",
+  {
+    id: int("id").primaryKey().autoincrement(),
+
+    senderId: int("sender_id").notNull(),
+    receiverId: int("receiver_id").notNull(),
+
+    status: mysqlEnum("status", ["pending", "accepted", "rejected"])
+      .default("pending")
+      .notNull(),
+
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    senderFk: foreignKey({
+      columns: [table.senderId],
+      foreignColumns: [users.id],
+    }),
+    receiverFk: foreignKey({
+      columns: [table.receiverId],
+      foreignColumns: [users.id],
+    }),
+	 uniqueReq: uniqueIndex("follow_req_unique")
+      .on(table.senderId, table.receiverId),
+  })
+);
+

@@ -37,7 +37,7 @@ export class SavedPostsService {
       .from(savedPostsTable)
       .where(eq(savedPostsTable.userId, userId));
 
-    // csak a mentett postokat kérdezzük le
+   
     const postsWithDetails = await basePostQuery(userId)
       .where(sql`${posts.id} IN (${savedPosts.map(p => p.postId)})`);
 

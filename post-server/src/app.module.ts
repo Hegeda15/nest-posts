@@ -10,8 +10,7 @@ import { CommentsModule } from './comments/comments.module';
 import { SavedPostsModule } from './saved-posts/saved-posts.module';
 import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
-import { FriendsModule } from './friends/friends.module';
-import { FriendsModule } from './friends/friends.module';
+
 
 @Module({
   imports: [

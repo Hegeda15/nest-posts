@@ -1,34 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, BadRequestException } from '@nestjs/common';
 import { FriendsService } from './friends.service';
-import { CreateFriendDto } from './dto/create-friend.dto';
-import { UpdateFriendDto } from './dto/update-friend.dto';
+import { SendFriendRequestDto, RespondFriendRequestDto } from './dto';
 
 @Controller('friends')
 export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
 
-  @Post()
-  create(@Body() createFriendDto: CreateFriendDto) {
-    return this.friendsService.create(createFriendDto);
+  @Post('send')
+  async sendRequest(@Body() body: SendFriendRequestDto & { senderId?: number }) {
+    const senderId = body['senderId'];
+    if (!senderId) throw new BadRequestException('senderId is required in body');
+    return this.friendsService.sendRequestService(senderId, body.receiverId);
   }
 
-  @Get()
-  findAll() {
-    return this.friendsService.findAll();
+  @Patch(':id/respond')
+  async respond(
+    @Param('id') id: string,
+    @Body() body: RespondFriendRequestDto & { userId?: number },
+  ) {
+    const userId = body['userId'];
+    if (!userId) throw new BadRequestException('userId is required in body');
+    return this.friendsService.respondService(+id, userId, body.status);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.friendsService.findOne(+id);
+  @Get('pending/:userId')
+  async getPending(@Param('userId') userId: string) {
+    return this.friendsService.getPendingRequests(+userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFriendDto: UpdateFriendDto) {
-    return this.friendsService.update(+id, updateFriendDto);
+  @Get('sent/:userId')
+  async getSent(@Param('userId') userId: string) {
+    return this.friendsService.getSentRequests(+userId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.friendsService.remove(+id);
+  @Get('list/:userId')
+  async getFriends(@Param('userId') userId: string) {
+    return this.friendsService.getFriendsList(+userId);
+  }
+  @Get('count/:userId')
+  async getFollowerCount(@Param('userId') userId: string) {
+    return this.friendsService.FollowerCount(+userId);
   }
 }
